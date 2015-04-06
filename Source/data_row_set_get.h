@@ -37,8 +37,18 @@
 
 #include "../Headers/data_row.h"
 #include <deque>
+#include <chrono>
+#include <sstream>
 
 using std::deque;
+using std::chrono::steady_clock;
+using std::chrono::duration_cast;
+using std::chrono::hours;
+using std::chrono::minutes;
+using std::chrono::milliseconds;
+using std::chrono::microseconds;
+using std::chrono::nanoseconds;
+using std::stringstream;
 
 
 namespace par_merge_sort {
@@ -67,6 +77,62 @@ string data_row<T>::get_type() const {
 template<typename T>
 void data_row<T>::clear() {
 	data.clear();
+}
+
+template<typename T>
+steady_clock::duration data_row<T>::get_operation_time(string unit) { //return duration casted in given unit (default: milliseconds)
+	if (unit == "h") {
+		return duration_cast<hours>(operation_time);
+	}
+	else if (unit == "m") {
+		return duration_cast<minutes>(operation_time);
+	}
+	else if (unit == "mic") {
+		return duration_cast<microseconds>(operation_time);
+	}
+	else if (unit == "nan") {
+		return duration_cast<nanoseconds>(operation_time);
+	}
+	else {
+		return duration_cast<milliseconds>(operation_time);
+	}
+}
+
+template<typename T>
+steady_clock::duration data_row<T>::get_operation_time() { //return duration casted in milliseconds
+	return duration_cast<milliseconds>(operation_time);
+}
+
+template<typename T>
+string data_row<T>::get_operation_time_string(string unit) { //return duration casted in given unit (default: milliseconds)
+	stringstream converter;
+	if (unit == "h") {
+		converter << duration_cast<hours>(operation_time).count();
+		return converter.str();
+	}
+	else if (unit == "m") {
+		converter << duration_cast<minutes>(operation_time).count();
+		return converter.str();
+	}
+	else if (unit == "mic") {
+		converter << duration_cast<microseconds>(operation_time).count();
+		return converter.str();
+	}
+	else if (unit == "nan") {
+		converter << duration_cast<nanoseconds>(operation_time).count();
+		return converter.str();
+	}
+	else {
+		converter << duration_cast<milliseconds>(operation_time).count();
+		return converter.str();
+	}
+}
+
+template<typename T>
+string data_row<T>::get_operation_time_string() { //return duration casted in milliseconds
+	stringstream converter;
+	converter << duration_cast<milliseconds>(operation_time).count();
+	return converter.str();
 }
 
 }

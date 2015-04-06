@@ -41,6 +41,7 @@
 #include <string>
 #include <ostream>
 #include <istream>
+#include <chrono>
 #include "../libcsv/libcsv.h"
 
 using std::deque;
@@ -49,6 +50,7 @@ using csv::csv_parser;
 using csv::csv_creator;
 using std::ostream;
 using std::istream;
+using std::chrono::steady_clock;
 
 
 namespace par_merge_sort {
@@ -58,6 +60,7 @@ class data_row {
 private:
 	deque<T> data;
 	string type;
+	steady_clock::duration operation_time;
 public:
 	data_row(); //standard constructor
 	data_row(deque<T>&& input); //move constructor from deque
@@ -82,6 +85,10 @@ public:
 
 	deque<T> get_data() const; //get data as deque
 	string get_type() const; //get type
+	steady_clock::duration get_operation_time(string unit); //get operation time as duration
+	steady_clock::duration get_operation_time(); //get operation time as duration (milliseconds)
+	string get_operation_time_string(string unit); //get operation time as string
+	string get_operation_time_string(); //get operation time as string (milliseconds)
 
 	void clear(); //delete data
 };
