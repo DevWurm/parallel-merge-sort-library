@@ -35,12 +35,13 @@
 */
 
 #include "../Headers/data_row.h"
+#include "merge_sort_functions.h"
 
 namespace par_merge_sort {
 
 template<typename T>
-void data_row<T>::merge_sort() {
-	//Code for merge sort
+void data_row<T>::merge_sort_data() {
+	data = merge_sort(data);
 }
 
 }

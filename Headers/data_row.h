@@ -62,19 +62,20 @@ public:
 	data_row(); //standard constructor
 	data_row(deque<T>&& input); //move constructor from deque
 	data_row(const deque<T>& input); //copy constructor from deque
-	data_row(data_row<T>&& input); //move constructor from data_row
-	data_row(const data_row<T>& input); //copy constructor from data_row
 
 	data_row<T>& operator=(deque<T>&& input); //move operator from deque
 	data_row<T>& operator=(const deque<T>& input); //assign operator from deque
 
-	friend data_row<T>& operator >>(csv_parser<T>& input, data_row<T>& target);
+	template<typename S>
+	friend data_row<S>& operator >>(csv_parser<S>& input, data_row<S>& target);
 	csv_creator<T>& operator >>(csv_creator<T> target);
-	friend istream& operator >>(istream& input, data_row<T> target);
-	friend ostream& operator <<(ostream& output, data_row<T> source);
+	template<typename S>
+	friend istream& operator >>(istream& input, data_row<S> target);
+	template<typename S>
+	friend ostream& operator <<(ostream& output, data_row<S> source);
 
-	void merge_sort();
-	void parallel_merge_sort();
+	void merge_sort_data();
+	void parallel_merge_sort_data();
 
 	void set_data(deque<T>&& input); //set data from deque (move)
 	void set_data(const deque<T>& input); //set data from deque
