@@ -38,7 +38,7 @@
 #define LIB_LIBPARALLELMERGESORT_H_
 
 
-#include "../libcsv/libcsv.h"
+#include "libcsv.h"
 #include <deque>
 #include <chrono>
 #include <string>
@@ -47,7 +47,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
-#include "../liberror/liberror.h"
+#include <thread>
+#include "liberror.h"
 
 using std::deque;
 using std::string;
@@ -66,6 +67,7 @@ using std::ostream;
 using std::istream;
 using std::out_of_range;
 using err::error;
+using std::thread;
 
 namespace par_merge_sort {
 
@@ -106,6 +108,59 @@ public:
 
 	void clear(); //delete data
 };
+
+template<typename T>
+data_row<T>::data_row() {
+	type = typeid(T).name();
+}
+
+template<typename T>
+data_row<T>::data_row(deque<T>&& input): data(input) {
+	type = typeid(T).name();
+	input.clear();
+}
+
+template<typename T>
+data_row<T>::data_row(const deque<T>& input): data(input) {
+	type = typeid(T).name();
+}
+
+template<typename T>
+data_row<T>& data_row<T>::operator =(const deque<T>& input) {
+	data = input;
+}
+
+template<typename T>
+data_row<T>& data_row<T>::operator =(deque<T>&& input) {
+	data = input;
+	input.clear();
+}
+
+template<typename T>
+data_row<T>& operator >>(csv_parser<T>& input, data_row<T>& target) {
+	input >> target.data;
+	return target;
+}
+
+template<typename T>
+csv_creator<T>& data_row<T>::operator >>(csv_creator<T> target) {
+	data >> target;
+	return target;
+}
+
+template<typename T>
+istream& operator >>(istream& input, data_row<T> target) {
+	csv_handler<T> temp_handler;
+	input >> temp_handler >> target.data;
+	return input;
+}
+
+template<typename T>
+ostream& operator <<(ostream& output, data_row<T> source) {
+	csv_handler<T> temp_handler;
+	source.data >> temp_handler >> output;
+	return output;
+}
 
 template<typename T>
 void data_row<T>::set_data(const deque<T>& input) {
@@ -190,43 +245,6 @@ string data_row<T>::get_operation_time_string() { //return duration casted in mi
 }
 
 template<typename T>
-data_row<T>& data_row<T>::operator =(const deque<T>& input) {
-	data = input;
-}
-
-template<typename T>
-data_row<T>& data_row<T>::operator =(deque<T>&& input) {
-	data = input;
-	input.clear();
-}
-
-template<typename T>
-data_row<T>& operator >>(csv_parser<T>& input, data_row<T>& target) {
-	input >> target.data;
-	return target;
-}
-
-template<typename T>
-csv_creator<T>& data_row<T>::operator >>(csv_creator<T> target) {
-	data >> target;
-	return target;
-}
-
-template<typename T>
-istream& operator >>(istream& input, data_row<T> target) {
-	csv_handler<T> temp_handler;
-	input >> temp_handler >> target.data;
-	return input;
-}
-
-template<typename T>
-ostream& operator <<(ostream& output, data_row<T> source) {
-	csv_handler<T> temp_handler;
-	source.data >> temp_handler >> output;
-	return output;
-}
-
-template<typename T>
 void restack (deque<T>& source, deque<T>& target, int n){ //move n elements from the front of source to the end of target
 	for (int i = 0; i <= n-1; i++) {
 		try {
@@ -290,26 +308,26 @@ void data_row<T>::merge_sort_data() {
 }
 
 template<typename T>
+void parallel_merge_sort(deque<T>& input) {
+	if (input.size() <= 1) {
+		return input;
+	}
+	else {
+		deque<T> list1;
+		deque<T> list2;
+		restack(input, list1, ceil(input.size()/2));
+		restack(input, list2, input.size());
+		thread t1(parallel_merge_sort, list1);
+		thread t2(parallel_merge_sort, list2);
+		t1.join();
+		t2.join();
+		input =  merge_sort_merge(list1, list2);
+	}
+}
+
+template<typename T>
 void data_row<T>::parallel_merge_sort_data() {
-	data = merge_sort(data);
-}
-
-template<typename T>
-data_row<T>::data_row() {
-	type = typeid(T).name();
-}
-
-template<typename T>
-data_row<T>::data_row(deque<T>&& input): data(input) {
-	type = typeid(T).name();
-	input.clear();
-}
-
-template<typename T>
-data_row<T>::data_row(const deque<T>& input): data(input) {
-	type = typeid(T).name();
-}
-
+	parallel_merge_sort(data);
 }
 
 
