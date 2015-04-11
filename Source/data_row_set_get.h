@@ -45,6 +45,7 @@ using std::chrono::steady_clock;
 using std::chrono::duration_cast;
 using std::chrono::hours;
 using std::chrono::minutes;
+using std::chrono::seconds;
 using std::chrono::milliseconds;
 using std::chrono::microseconds;
 using std::chrono::nanoseconds;
@@ -87,6 +88,9 @@ steady_clock::duration data_row<T>::get_operation_time(string unit) { //return d
 	else if (unit == "m") {
 		return duration_cast<minutes>(operation_time);
 	}
+	else if (unit == "s") {
+		return duration_cast<seconds>(operation_time);
+	}
 	else if (unit == "mic") {
 		return duration_cast<microseconds>(operation_time);
 	}
@@ -112,6 +116,10 @@ string data_row<T>::get_operation_time_string(string unit) { //return duration c
 	}
 	else if (unit == "m") {
 		converter << duration_cast<minutes>(operation_time).count();
+		return converter.str();
+	}
+	else if (unit == "s") {
+		converter << duration_cast<seconds>(operation_time).count();
 		return converter.str();
 	}
 	else if (unit == "mic") {

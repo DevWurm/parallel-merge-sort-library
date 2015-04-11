@@ -41,7 +41,10 @@ namespace par_merge_sort {
 
 template<typename T>
 void data_row<T>::parallel_merge_sort_data() {
-	parallel_merge_sort(data);
+	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+	parallel_merge_sort_manager(data);
+	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
+	operation_time = stop - start;
 }
 
 }
