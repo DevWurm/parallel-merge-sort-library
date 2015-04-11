@@ -43,7 +43,7 @@ namespace par_merge_sort {
 template<typename T>
 void data_row<T>::merge_sort_data() {
 	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-	data = merge_sort(data);
+	merge_sort(data);
 	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
 	operation_time = stop - start;
 }

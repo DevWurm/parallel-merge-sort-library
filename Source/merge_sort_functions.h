@@ -34,18 +34,30 @@ deque<T> merge_sort_merge(deque<T>& list1, deque<T>& list2) {
 }
 
 template<typename T>
-deque<T> merge_sort(deque<T>& input) {
-	if (input.size() <= 1) {
-		return input;
-	}
-	else {
-		deque<T> list1;
-		deque<T> list2;
-		restack(input, list1, ceil(input.size()/2));
-		restack(input, list2, input.size());
-		list1=merge_sort(list1);
-		list2=merge_sort(list2);
-		return merge_sort_merge(list1, list2);
+void merge_sort(deque<T>& input) {
+	int input_size = input.size();
+	for (int list_width = 1; list_width < input_size; list_width *= 2) {
+		deque<T> buffer;
+		restack(input, buffer, input.size());
+		while (buffer.size() > 0) {
+			deque<T> list1;
+			deque<T> list2;
+			if (buffer.size() >= list_width) {
+				restack(buffer, list1, list_width);
+			}
+			else {
+				restack(buffer, list1, buffer.size());
+			}
+			if (buffer.size() >= list_width) {
+				restack(buffer, list2, list_width);
+			}
+			else {
+				restack(buffer, list2, buffer.size());
+			}
+			deque<T> return_buffer = merge_sort_merge(list1, list2);
+			restack(return_buffer, input, return_buffer.size());
+		}
+
 	}
 }
 

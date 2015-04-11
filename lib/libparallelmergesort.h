@@ -48,6 +48,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <thread>
+#include <cstdlib>
 #include "liberror.h"
 
 using std::deque;
@@ -68,6 +69,7 @@ using std::istream;
 using std::out_of_range;
 using err::error;
 using std::thread;
+using std::ref,
 
 namespace par_merge_sort {
 
@@ -126,7 +128,7 @@ data_row<T>::data_row(const deque<T>& input): data(input) {
 }
 
 template<typename T>
-data_row<T>& data_row<T>::operator =(const deque<T>& input) {
+	data_row<T>& data_row<T>::operator =(const deque<T>& input) {
 	data = input;
 }
 
@@ -196,6 +198,9 @@ steady_clock::duration data_row<T>::get_operation_time(string unit) { //return d
 	else if (unit == "m") {
 		return duration_cast<minutes>(operation_time);
 	}
+	else if (unit == "s") {
+		return duration_cast<seconds>(operation_time);
+	}
 	else if (unit == "mic") {
 		return duration_cast<microseconds>(operation_time);
 	}
@@ -221,6 +226,10 @@ string data_row<T>::get_operation_time_string(string unit) { //return duration c
 	}
 	else if (unit == "m") {
 		converter << duration_cast<minutes>(operation_time).count();
+		return converter.str();
+	}
+	else if (unit == "s") {
+		converter << duration_cast<seconds>(operation_time).count();
 		return converter.str();
 	}
 	else if (unit == "mic") {
@@ -284,25 +293,37 @@ deque<T> merge_sort_merge(deque<T>& list1, deque<T>& list2) {
 }
 
 template<typename T>
-deque<T> merge_sort(deque<T>& input) {
-	if (input.size() <= 1) {
-		return input;
-	}
-	else {
-		deque<T> list1;
-		deque<T> list2;
-		restack(input, list1, ceil(input.size()/2));
-		restack(input, list2, input.size());
-		list1=merge_sort(list1);
-		list2=merge_sort(list2);
-		return merge_sort_merge(list1, list2);
+void merge_sort(deque<T>& input) {
+	int input_size = input.size();
+	for (int list_width = 1; list_width < input_size; list_width *= 2) {
+		deque<T> buffer;
+		restack(input, buffer, input.size());
+		while (buffer.size() > 0) {
+			deque<T> list1;
+			deque<T> list2;
+			if (buffer.size() >= list_width) {
+				restack(buffer, list1, list_width);
+			}
+			else {
+				restack(buffer, list1, buffer.size());
+			}
+			if (buffer.size() >= list_width) {
+				restack(buffer, list2, list_width);
+			}
+			else {
+				restack(buffer, list2, buffer.size());
+			}
+			deque<T> return_buffer = merge_sort_merge(list1, list2);
+			restack(return_buffer, input, return_buffer.size());
+		}
+
 	}
 }
 
 template<typename T>
 void data_row<T>::merge_sort_data() {
 	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-	data = merge_sort(data);
+	merge_sort(data);
 	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
 	operation_time = stop - start;
 }
@@ -316,7 +337,7 @@ struct thread_block {
 template<typename T>
 void parallel_merge_sort(deque<T>& input, int& basic_width) {
 	int input_size = input.size();
-	for (int list_width = basic_width; list_width <= ceil(input_size/2); list_width *= 2) {
+	for (int list_width = basic_width; list_width < input_size; list_width *= 2) {
 		deque<T> buffer;
 		restack(input, buffer, input.size());
 		while (buffer.size() > 0) {
@@ -350,15 +371,14 @@ void parallel_merge_sort_manager(deque<T>& input) {
 
 	while (num_of_threads > 0) {
 		for (int i = 0; i <= num_of_threads-1; i++) {
+			thread_list.emplace_back();
 			if (i != num_of_threads-1) {
-				thread_list.push_back(new thread_block<T>);
 				restack(input,thread_list.at(i).data, ceil(input_size/num_of_threads));
 				thread_list.at(i).t = thread(parallel_merge_sort<T>, ref(thread_list.at(i).data), ref(basic_width));
 			}
 			else {
-				thread_list.push_back(new thread_block<T>);
-				restack(input,thread_list.at(i).data, ceil(input.size()));
-				thread_list.at(i).t = thread(parallel_merge_sort, ref(thread_list.at(i).data), ref(basic_width));
+				restack(input,thread_list.at(i).data, input.size());
+				thread_list.at(i).t = thread(parallel_merge_sort<T>, ref(thread_list.at(i).data), ref(basic_width));
 			}
 		}
 		for (int i = 0; i <= thread_list.size()-1; i++ ) {
@@ -379,7 +399,6 @@ void data_row<T>::parallel_merge_sort_data() {
 	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
 	operation_time = stop - start;
 }
-
 }
 
 
