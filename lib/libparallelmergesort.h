@@ -38,7 +38,7 @@
 #define LIB_LIBPARALLELMERGESORT_H_
 
 
-#include "libcsv.h"
+#include "./libcsv.h"
 #include <deque>
 #include <chrono>
 #include <string>
@@ -49,7 +49,7 @@
 #include <cmath>
 #include <thread>
 #include <cstdlib>
-#include "liberror.h"
+#include "./liberror.h"
 
 using std::deque;
 using std::string;
@@ -57,6 +57,7 @@ using std::chrono::steady_clock;
 using std::chrono::duration_cast;
 using std::chrono::hours;
 using std::chrono::minutes;
+using std::chrono::seconds;
 using std::chrono::milliseconds;
 using std::chrono::microseconds;
 using std::chrono::nanoseconds;
@@ -69,7 +70,7 @@ using std::istream;
 using std::out_of_range;
 using err::error;
 using std::thread;
-using std::ref,
+using std::ref;
 
 namespace par_merge_sort {
 
@@ -293,9 +294,9 @@ deque<T> merge_sort_merge(deque<T>& list1, deque<T>& list2) {
 }
 
 template<typename T>
-void merge_sort(deque<T>& input) {
+void merge_sort(deque<T>& input, int basic_width = 1) {
 	int input_size = input.size();
-	for (int list_width = 1; list_width < input_size; list_width *= 2) {
+	for (int list_width = basic_width; list_width < input_size; list_width *= 2) {
 		deque<T> buffer;
 		restack(input, buffer, input.size());
 		while (buffer.size() > 0) {
@@ -334,36 +335,9 @@ struct thread_block {
 	deque<T> data;
 };
 
-template<typename T>
-void parallel_merge_sort(deque<T>& input, int& basic_width) {
-	int input_size = input.size();
-	for (int list_width = basic_width; list_width < input_size; list_width *= 2) {
-		deque<T> buffer;
-		restack(input, buffer, input.size());
-		while (buffer.size() > 0) {
-			deque<T> list1;
-			deque<T> list2;
-			if (buffer.size() >= list_width) {
-				restack(buffer, list1, list_width);
-			}
-			else {
-				restack(buffer, list1, buffer.size());
-			}
-			if (buffer.size() >= list_width) {
-				restack(buffer, list2, list_width);
-			}
-			else {
-				restack(buffer, list2, buffer.size());
-			}
-			deque<T> return_buffer = merge_sort_merge(list1, list2);
-			restack(return_buffer, input, return_buffer.size());
-		}
-
-	}
-}
 
 template<typename T>
-void parallel_merge_sort_manager(deque<T>& input) {
+void parallel_merge_sort(deque<T>& input) {
 	int num_of_threads = thread::hardware_concurrency();
 	deque<thread_block<T>> thread_list;
 	int input_size = input.size();
@@ -374,11 +348,11 @@ void parallel_merge_sort_manager(deque<T>& input) {
 			thread_list.emplace_back();
 			if (i != num_of_threads-1) {
 				restack(input,thread_list.at(i).data, ceil(input_size/num_of_threads));
-				thread_list.at(i).t = thread(parallel_merge_sort<T>, ref(thread_list.at(i).data), ref(basic_width));
+				thread_list.at(i).t = thread(merge_sort<T>, ref(thread_list.at(i).data), ref(basic_width));
 			}
 			else {
 				restack(input,thread_list.at(i).data, input.size());
-				thread_list.at(i).t = thread(parallel_merge_sort<T>, ref(thread_list.at(i).data), ref(basic_width));
+				thread_list.at(i).t = thread(merge_sort<T>, ref(thread_list.at(i).data), ref(basic_width));
 			}
 		}
 		for (int i = 0; i <= thread_list.size()-1; i++ ) {
@@ -395,7 +369,7 @@ void parallel_merge_sort_manager(deque<T>& input) {
 template<typename T>
 void data_row<T>::parallel_merge_sort_data() {
 	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-	parallel_merge_sort_manager(data);
+	parallel_merge_sort(data);
 	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
 	operation_time = stop - start;
 }

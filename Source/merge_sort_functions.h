@@ -34,9 +34,9 @@ deque<T> merge_sort_merge(deque<T>& list1, deque<T>& list2) {
 }
 
 template<typename T>
-void merge_sort(deque<T>& input) {
+void merge_sort(deque<T>& input, int basic_width = 1) {
 	int input_size = input.size();
-	for (int list_width = 1; list_width < input_size; list_width *= 2) {
+	for (int list_width = basic_width; list_width < input_size; list_width *= 2) {
 		deque<T> buffer;
 		restack(input, buffer, input.size());
 		while (buffer.size() > 0) {
