@@ -90,11 +90,11 @@ public:
 
 	template<typename S>
 	friend data_row<S>& operator >>(csv_parser<S>& input, data_row<S>& target);
-	csv_creator<T>& operator >>(csv_creator<T> target);
+	csv_creator<T>& operator >>(csv_creator<T>& target);
 	template<typename S>
-	friend istream& operator >>(istream& input, data_row<S> target);
+	friend istream& operator >>(istream& input, data_row<S>& target);
 	template<typename S>
-	friend ostream& operator <<(ostream& output, data_row<S> source);
+	friend ostream& operator <<(ostream& output, data_row<S>& source);
 
 	void merge_sort_data();
 	void parallel_merge_sort_data();
@@ -104,10 +104,11 @@ public:
 
 	deque<T> get_data() const; //get data as deque
 	string get_type() const; //get type
-	steady_clock::duration get_operation_time(string unit); //get operation time as duration
-	steady_clock::duration get_operation_time(); //get operation time as duration (milliseconds)
-	string get_operation_time_string(string unit); //get operation time as string
-	string get_operation_time_string(); //get operation time as string (milliseconds)
+	steady_clock::duration get_operation_time(string unit) const; //get operation time as duration
+	steady_clock::duration get_operation_time() const; //get operation time as duration (milliseconds)
+	string get_operation_time_string(string unit) const; //get operation time as string
+	string get_operation_time_string() const; //get operation time as string (milliseconds)
+	int get_data_length() const;
 
 	void clear(); //delete data
 };
@@ -146,20 +147,20 @@ data_row<T>& operator >>(csv_parser<T>& input, data_row<T>& target) {
 }
 
 template<typename T>
-csv_creator<T>& data_row<T>::operator >>(csv_creator<T> target) {
+csv_creator<T>& data_row<T>::operator >>(csv_creator<T>& target) {
 	data >> target;
 	return target;
 }
 
 template<typename T>
-istream& operator >>(istream& input, data_row<T> target) {
+istream& operator >>(istream& input, data_row<T>& target) {
 	csv_handler<T> temp_handler;
 	input >> temp_handler >> target.data;
 	return input;
 }
 
 template<typename T>
-ostream& operator <<(ostream& output, data_row<T> source) {
+ostream& operator <<(ostream& output, data_row<T>& source) {
 	csv_handler<T> temp_handler;
 	source.data >> temp_handler >> output;
 	return output;
@@ -192,7 +193,7 @@ void data_row<T>::clear() {
 }
 
 template<typename T>
-steady_clock::duration data_row<T>::get_operation_time(string unit) { //return duration casted in given unit (default: milliseconds)
+steady_clock::duration data_row<T>::get_operation_time(string unit) const { //return duration casted in given unit (default: milliseconds)
 	if (unit == "h") {
 		return duration_cast<hours>(operation_time);
 	}
@@ -214,12 +215,12 @@ steady_clock::duration data_row<T>::get_operation_time(string unit) { //return d
 }
 
 template<typename T>
-steady_clock::duration data_row<T>::get_operation_time() { //return duration casted in milliseconds
+steady_clock::duration data_row<T>::get_operation_time() const { //return duration casted in milliseconds
 	return duration_cast<milliseconds>(operation_time);
 }
 
 template<typename T>
-string data_row<T>::get_operation_time_string(string unit) { //return duration casted in given unit (default: milliseconds)
+string data_row<T>::get_operation_time_string(string unit) const { //return duration casted in given unit (default: milliseconds)
 	stringstream converter;
 	if (unit == "h") {
 		converter << duration_cast<hours>(operation_time).count();
@@ -248,10 +249,15 @@ string data_row<T>::get_operation_time_string(string unit) { //return duration c
 }
 
 template<typename T>
-string data_row<T>::get_operation_time_string() { //return duration casted in milliseconds
+string data_row<T>::get_operation_time_string() const { //return duration casted in milliseconds
 	stringstream converter;
 	converter << duration_cast<milliseconds>(operation_time).count();
 	return converter.str();
+}
+
+template<typename T>
+int data_row<T>::get_data_length() const {
+	return data.length();
 }
 
 template<typename T>

@@ -81,7 +81,7 @@ void data_row<T>::clear() {
 }
 
 template<typename T>
-steady_clock::duration data_row<T>::get_operation_time(string unit) { //return duration casted in given unit (default: milliseconds)
+steady_clock::duration data_row<T>::get_operation_time(string unit) const { //return duration casted in given unit (default: milliseconds)
 	if (unit == "h") {
 		return duration_cast<hours>(operation_time);
 	}
@@ -103,12 +103,12 @@ steady_clock::duration data_row<T>::get_operation_time(string unit) { //return d
 }
 
 template<typename T>
-steady_clock::duration data_row<T>::get_operation_time() { //return duration casted in milliseconds
+steady_clock::duration data_row<T>::get_operation_time() const { //return duration casted in milliseconds
 	return duration_cast<milliseconds>(operation_time);
 }
 
 template<typename T>
-string data_row<T>::get_operation_time_string(string unit) { //return duration casted in given unit (default: milliseconds)
+string data_row<T>::get_operation_time_string(string unit) const { //return duration casted in given unit (default: milliseconds)
 	stringstream converter;
 	if (unit == "h") {
 		converter << duration_cast<hours>(operation_time).count();
@@ -137,10 +137,15 @@ string data_row<T>::get_operation_time_string(string unit) { //return duration c
 }
 
 template<typename T>
-string data_row<T>::get_operation_time_string() { //return duration casted in milliseconds
+string data_row<T>::get_operation_time_string() const { //return duration casted in milliseconds
 	stringstream converter;
 	converter << duration_cast<milliseconds>(operation_time).count();
 	return converter.str();
+}
+
+template<typename T>
+int data_row<T>::get_data_length() const {
+	return data.length();
 }
 
 }

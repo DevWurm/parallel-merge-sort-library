@@ -71,11 +71,11 @@ public:
 
 	template<typename S>
 	friend data_row<S>& operator >>(csv_parser<S>& input, data_row<S>& target);
-	csv_creator<T>& operator >>(csv_creator<T> target);
+	csv_creator<T>& operator >>(csv_creator<T>& target);
 	template<typename S>
-	friend istream& operator >>(istream& input, data_row<S> target);
+	friend istream& operator >>(istream& input, data_row<S>& target);
 	template<typename S>
-	friend ostream& operator <<(ostream& output, data_row<S> source);
+	friend ostream& operator <<(ostream& output, data_row<S>& source);
 
 	void merge_sort_data();
 	void parallel_merge_sort_data();
@@ -85,10 +85,11 @@ public:
 
 	deque<T> get_data() const; //get data as deque
 	string get_type() const; //get type
-	steady_clock::duration get_operation_time(string unit); //get operation time as duration
-	steady_clock::duration get_operation_time(); //get operation time as duration (milliseconds)
-	string get_operation_time_string(string unit); //get operation time as string
-	string get_operation_time_string(); //get operation time as string (milliseconds)
+	steady_clock::duration get_operation_time(string unit) const; //get operation time as duration
+	steady_clock::duration get_operation_time() const; //get operation time as duration (milliseconds)
+	string get_operation_time_string(string unit) const; //get operation time as string
+	string get_operation_time_string() const; //get operation time as string (milliseconds)
+	int get_data_length() const;
 
 	void clear(); //delete data
 };

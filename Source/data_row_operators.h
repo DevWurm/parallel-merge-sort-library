@@ -69,20 +69,20 @@ namespace par_merge_sort {
 	}
 
 	template<typename T>
-	csv_creator<T>& data_row<T>::operator >>(csv_creator<T> target) {
+	csv_creator<T>& data_row<T>::operator >>(csv_creator<T>& target) {
 		data >> target;
 		return target;
 	}
 
 	template<typename T>
-	istream& operator >>(istream& input, data_row<T> target) {
+	istream& operator >>(istream& input, data_row<T>& target) {
 		csv_handler<T> temp_handler;
 		input >> temp_handler >> target.data;
 		return input;
 	}
 
 	template<typename T>
-	ostream& operator <<(ostream& output, data_row<T> source) {
+	ostream& operator <<(ostream& output, data_row<T>& source) {
 		csv_handler<T> temp_handler;
 		source.data >> temp_handler >> output;
 		return output;
