@@ -6,7 +6,7 @@ Until then, contact me, if you have questions.
 
 ##License
 Copyright 2015 DevWurm<br>
-'csv_library' is offered under GPL 3 License (Read ./license/gpl-3.0.txt)
+'parallel_merge_sort_library' is offered under GPL 3 License (Read ./license/gpl-3.0.txt)
 
 ##Authors
 DevWurm<br>
